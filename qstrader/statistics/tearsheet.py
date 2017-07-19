@@ -55,6 +55,9 @@ class TearsheetStatistics(AbstractStatistics):
         self.equity[timestamp] = PriceParser.display(
             self.portfolio_handler.portfolio.equity
         )
+
+        if self.equity[timestamp] < 0:
+            print("ACCOUNT BUSTED! : %s" %timestamp)
         if self.benchmark is not None:
             self.equity_benchmark[timestamp] = PriceParser.display(
                 self.price_handler.get_last_close(self.benchmark)
@@ -77,6 +80,7 @@ class TearsheetStatistics(AbstractStatistics):
         )
 
         # Cummulative Returns
+        
         cum_returns_s = np.exp(np.log(1 + returns_s).cumsum())
 
         # Drawdown, max drawdown, max drawdown duration
@@ -634,7 +638,7 @@ class TearsheetStatistics(AbstractStatistics):
         self._plot_txt_time(stats, ax=ax_txt_time)
 
         # Plot the figure
-        plt.show(block=False)
+        plt.show(block=True)
 
         if filename is not None:
             fig.savefig(filename, dpi=150, bbox_inches='tight')

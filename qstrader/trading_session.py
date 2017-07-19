@@ -3,6 +3,7 @@ from datetime import datetime
 from .compat import queue
 from .event import EventType
 from .price_handler.yahoo_daily_csv_bar import YahooDailyCsvBarPriceHandler
+from .price_handler.mt4_exported_bar_csv import Mt4CsvBarPriceHandler
 from .price_parser import PriceParser
 from .position_sizer.fixed import FixedPositionSizer
 from .risk_manager.example import ExampleRiskManager
@@ -61,12 +62,23 @@ class TradingSession(object):
         Initialises the necessary classes used
         within the session.
         """
-        if self.price_handler is None and self.session_type == "backtest":
-            self.price_handler = YahooDailyCsvBarPriceHandler(
-                self.config.CSV_DATA_DIR, self.events_queue,
-                self.tickers, start_date=self.start_date,
-                end_date=self.end_date
-            )
+        
+        if self.session_type == "backtest":
+            
+            if self.price_handler is None:
+                self.price_handler = YahooDailyCsvBarPriceHandler(
+                    self.config.CSV_DATA_DIR, self.events_queue,
+                    self.tickers, start_date=self.start_date,
+                    end_date=self.end_date
+                )
+
+            if self.price_handler == "MT4":
+                self.price_handler = Mt4CsvBarPriceHandler(
+                    self.config.CSV_DATA_DIR, self.events_queue,
+                        self.tickers, start_date=self.start_date,
+                        end_date=self.end_date,
+			calc_returns=True
+                )
 
         if self.position_sizer is None:
             self.position_sizer = FixedPositionSizer()

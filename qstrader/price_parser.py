@@ -22,7 +22,6 @@ class PriceParser(object):
     the qstrader system. Numbers should also always be parsed correctly to view.
 
     """
-
     # 10,000,000
     PRICE_MULTIPLIER = 10000000
 

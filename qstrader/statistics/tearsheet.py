@@ -52,6 +52,8 @@ class TearsheetStatistics(AbstractStatistics):
         Update equity curve and benchmark equity curve that must be tracked
         over time.
         """
+        if timestamp == pd.to_datetime("2009/1/27"):
+            from pudb import set_trace; set_trace()
         self.equity[timestamp] = PriceParser.display(
             self.portfolio_handler.portfolio.equity
         )

@@ -9,7 +9,7 @@ class Portfolio(object):
         cash, with no PnL - realised or unrealised.
 
         Note that realised_pnl is the running tally pnl from closed
-        positions (closed_pnl), as well as realised_pnl
+        positions (closed_pnl), as well as unrealised_pnl
         from currently open positions.
         """
         self.price_handler = price_handler
@@ -124,7 +124,7 @@ class Portfolio(object):
         Hence, this single method will be called by the
         PortfolioHandler to update the Portfolio itself.
         """
-
+        from pudb import set_trace; set_trace()
         if action == "BOT":
             self.cur_cash -= ((quantity * price) + commission)
         elif action == "SLD":

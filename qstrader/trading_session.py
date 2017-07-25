@@ -10,6 +10,7 @@ from .risk_manager.example import ExampleRiskManager
 from .portfolio_handler import PortfolioHandler
 from .compliance.example import ExampleCompliance
 from .execution_handler.ib_simulated import IBSimulatedExecutionHandler
+from .execution_handler.forex_generic_simulated import ForexGenericSimulatedExecution
 from .statistics.tearsheet import TearsheetStatistics
 
 
@@ -63,6 +64,7 @@ class TradingSession(object):
         within the session.
         """
         
+        # Price handler
         if self.session_type == "backtest":
             
             if self.price_handler is None:
@@ -98,8 +100,17 @@ class TradingSession(object):
         if self.compliance is None:
             self.compliance = ExampleCompliance(self.config)
 
+
+        # Execution handler
         if self.execution_handler is None:
             self.execution_handler = IBSimulatedExecutionHandler(
+                self.events_queue,
+                self.price_handler,
+                self.compliance
+            )
+      
+        if self.execution_handler == "FX":
+            self.execution_handler = ForexGenericSimulatedExecution(
                 self.events_queue,
                 self.price_handler,
                 self.compliance

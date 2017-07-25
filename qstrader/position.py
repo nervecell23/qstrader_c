@@ -43,7 +43,6 @@ class Position(object):
 
         Finally, calculate the net total with and without commission.
         """
-        from pudb import set_trace; set_trace()
         if self.action == "BOT":
             self.buys = self.quantity
             self.avg_bot = self.init_price

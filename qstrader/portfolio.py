@@ -124,7 +124,6 @@ class Portfolio(object):
         Hence, this single method will be called by the
         PortfolioHandler to update the Portfolio itself.
         """
-        from pudb import set_trace; set_trace()
         if action == "BOT":
             self.cur_cash -= ((quantity * price) + commission)
         elif action == "SLD":

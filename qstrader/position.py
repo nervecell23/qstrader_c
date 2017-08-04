@@ -5,7 +5,7 @@ class Position(object):
     def __init__(
         self, action, ticker, init_quantity,
         init_price, init_commission,
-        bid, ask
+        bid, ask, open_timestamp, close_timestamp=None
     ):
         """
         Set up the initial "account" of the Position to be
@@ -31,7 +31,12 @@ class Position(object):
         self.total_bot = 0
         self.total_sld = 0
         self.total_commission = init_commission
+        self.margin = 0
 
+        self.leverage = 200
+        self.open_timestamp = open_timestamp
+        self.close_timestamp = close_timestamp 
+       
         self._calculate_initial_value()
         self.update_market_value(bid, ask)
 
@@ -58,6 +63,8 @@ class Position(object):
         self.net = self.buys - self.sells
         self.net_total = self.total_sld - self.total_bot
         self.net_incl_comm = self.net_total - self.init_commission
+
+        self.margin = abs(self.cost_basis // self.leverage)
 
     def update_market_value(self, bid, ask):
         """
@@ -113,7 +120,6 @@ class Position(object):
                     self.avg_price * self.sells +
                     price * quantity - commission
                 ) // (self.sells + quantity)
-                self.unrealised_pnl -= commission
             elif self.action == "BOT":  # Closed partial positions out
                 self.realised_pnl += quantity * (
                     price - self.avg_price

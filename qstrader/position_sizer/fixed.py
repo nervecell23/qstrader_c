@@ -10,5 +10,5 @@ class FixedPositionSizer(AbstractPositionSizer):
         This position sizer does nothing
         """
         #initial_order.quantity = self.default_quantity
-        
+
         return initial_order

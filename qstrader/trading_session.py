@@ -36,7 +36,7 @@ class TradingSession(object):
         self.config = config
         self.strategy = strategy
         self.tickers = tickers
-        self.equity = PriceParser.parse(equity)
+        self.equity = PriceParser.parse(equity) 
         self.start_date = start_date
         self.end_date = end_date
         self.events_queue = events_queue

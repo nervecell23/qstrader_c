@@ -44,6 +44,7 @@ class TearsheetStatistics(AbstractStatistics):
         self.periods = periods
         self.rolling_sharpe = rolling_sharpe
         self.equity = {}
+        self.equity_post_close = {}
         self.equity_benchmark = {}
         self.log_scale = False
 
@@ -55,7 +56,12 @@ class TearsheetStatistics(AbstractStatistics):
         self.equity[timestamp] = PriceParser.display(
             self.portfolio_handler.portfolio.equity
         )
+        
+        if portfolio_handler.portfolio.new_pos_closed == True:
+            self.equity_post_close[timestamp] = self.equity[timestamp]
+            portfolio_handler.portfolio.new_pos_closed = False
 
+        #TODO: When equity < 0, backtesting is aborted
         if self.equity[timestamp] < 0:
             print("ACCOUNT BUSTED! : %s" %timestamp)
         if self.benchmark is not None:
@@ -69,6 +75,7 @@ class TearsheetStatistics(AbstractStatistics):
         """
         # Equity
         equity_s = pd.Series(self.equity).sort_index()
+        equity_post_close_s = pd.Series(self.equity_post_close).sort_index()
 
         # Returns
         returns_s = equity_s.pct_change().fillna(0.0)
@@ -98,6 +105,7 @@ class TearsheetStatistics(AbstractStatistics):
         statistics["max_drawdown_pct"] = max_dd
         statistics["max_drawdown_duration"] = dd_dur
         statistics["equity"] = equity_s
+        statistics["equity_close"] = equity_post_close_s
         statistics["returns"] = returns_s
         statistics["rolling_sharpe"] = rolling_sharpe_s
         statistics["cum_returns"] = cum_returns_s
@@ -166,6 +174,7 @@ class TearsheetStatistics(AbstractStatistics):
         """
         Plots cumulative rolling returns versus some benchmark.
         """
+        from pudb import set_trace; set_trace()
         def format_two_dec(x, pos):
             return '%.2f' % x
 
@@ -185,11 +194,11 @@ class TearsheetStatistics(AbstractStatistics):
         if self.benchmark is not None:
             benchmark = stats['cum_returns_b']
             benchmark.plot(
-                lw=2, color='gray', label=self.benchmark, alpha=0.60,
+                lw=1, color='gray', label=self.benchmark, alpha=0.60,
                 ax=ax, **kwargs
             )
 
-        equity.plot(lw=2, color='green', alpha=0.6, x_compat=False,
+        equity.plot(lw=1, color='green', alpha=0.6, x_compat=False,
                     label='Backtest', ax=ax, **kwargs)
 
         ax.axhline(1.0, linestyle='--', color='black', lw=1)
@@ -202,6 +211,16 @@ class TearsheetStatistics(AbstractStatistics):
             ax.set_yscale('log')
 
         return ax
+
+    def _plot_equity_close(self, stats, ax=None, **kwargs):
+        equity_close = stats['equity_close']
+        equity_close.index = range(len(equity_close))
+       
+        if ax is None:
+            ax = plt.gca()
+    
+        equity_close.plot(lw=1, color='green',ax=ax, **kwargs)
+        return ax 
 
     def _plot_rolling_sharpe(self, stats, ax=None, **kwargs):
         """
@@ -611,25 +630,28 @@ class TearsheetStatistics(AbstractStatistics):
             offset_index = 1
         else:
             offset_index = 0
-        vertical_sections = 5 + offset_index
+        vertical_sections = 7 + offset_index
         fig = plt.figure(figsize=(10, vertical_sections * 3.5))
         fig.suptitle(self.title, y=0.94, weight='bold')
         gs = gridspec.GridSpec(vertical_sections, 3, wspace=0.25, hspace=0.5)
 
         stats = self.get_results()
         ax_equity = plt.subplot(gs[:2, :])
+        ax_equity_close = plt.subplot(gs[2:4,:])
         if self.rolling_sharpe:
-            ax_sharpe = plt.subplot(gs[2, :])
-        ax_drawdown = plt.subplot(gs[2 + offset_index, :])
-        ax_monthly_returns = plt.subplot(gs[3 + offset_index, :2])
-        ax_yearly_returns = plt.subplot(gs[3 + offset_index, 2])
-        ax_txt_curve = plt.subplot(gs[4 + offset_index, 0])
-        ax_txt_trade = plt.subplot(gs[4 + offset_index, 1])
-        ax_txt_time = plt.subplot(gs[4 + offset_index, 2])
+            ax_sharpe = plt.subplot(gs[4, :])
+        ax_drawdown = plt.subplot(gs[4 + offset_index, :])
+        ax_monthly_returns = plt.subplot(gs[5 + offset_index, :2])
+        ax_yearly_returns = plt.subplot(gs[5 + offset_index, 2])
+        ax_txt_curve = plt.subplot(gs[6 + offset_index, 0])
+        ax_txt_trade = plt.subplot(gs[6 + offset_index, 1])
+        ax_txt_time = plt.subplot(gs[6 + offset_index, 2])
 
         self._plot_equity(stats, ax=ax_equity)
+        self._plot_equity_close(stats, ax_equity_close)
         if self.rolling_sharpe:
             self._plot_rolling_sharpe(stats, ax=ax_sharpe)
+
         self._plot_drawdown(stats, ax=ax_drawdown)
         self._plot_monthly_returns(stats, ax=ax_monthly_returns)
         self._plot_yearly_returns(stats, ax=ax_yearly_returns)

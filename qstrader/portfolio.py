@@ -21,6 +21,7 @@ class Portfolio(object):
         self.realised_pnl = 0
         self.margin =0
         self.free_margin = 0
+        self.new_pos_closed = True
 
     def _update_portfolio(self):
         """
@@ -112,6 +113,7 @@ class Portfolio(object):
                 closed.close_timestamp = self.price_handler.get_last_timestamp(ticker)
                 self.realised_pnl += closed.realised_pnl
                 self.closed_positions.append(closed)
+                self.new_pos_closed = True
 
             self._update_portfolio()
         else:

@@ -174,7 +174,6 @@ class TearsheetStatistics(AbstractStatistics):
         """
         Plots cumulative rolling returns versus some benchmark.
         """
-        from pudb import set_trace; set_trace()
         def format_two_dec(x, pos):
             return '%.2f' % x
 
@@ -220,6 +219,8 @@ class TearsheetStatistics(AbstractStatistics):
             ax = plt.gca()
     
         equity_close.plot(lw=1, color='green',ax=ax, **kwargs)
+        for idx,val in equity_close.iteritems():
+            ax.annotate("%s"%val,xy=(idx,val),textcoords='data')
         return ax 
 
     def _plot_rolling_sharpe(self, stats, ax=None, **kwargs):

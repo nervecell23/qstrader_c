@@ -61,7 +61,6 @@ class TearsheetStatistics(AbstractStatistics):
             self.equity_post_close[timestamp] = self.equity[timestamp]
             portfolio_handler.portfolio.new_pos_closed = False
 
-        #TODO: When equity < 0, backtesting is aborted
         if self.equity[timestamp] < 0:
             print("ACCOUNT BUSTED! : %s" %timestamp)
         if self.benchmark is not None:
@@ -211,16 +210,22 @@ class TearsheetStatistics(AbstractStatistics):
 
         return ax
 
-    def _plot_equity_close(self, stats, ax=None, **kwargs):
+    def _plot_equity_close(self, stats, ax=None, annotate=False, **kwargs):
         equity_close = stats['equity_close']
+        #print(equity_close)
         equity_close.index = range(len(equity_close))
+        prev_val = PriceParser.display(self.portfolio_handler.portfolio.init_cash)
        
         if ax is None:
             ax = plt.gca()
     
         equity_close.plot(lw=1, color='green',ax=ax, **kwargs)
-        for idx,val in equity_close.iteritems():
-            ax.annotate("%s"%val,xy=(idx,val),textcoords='data')
+
+        if annotate == True:
+            for idx,val in equity_close.iteritems(): 
+                ax.annotate("%s"%str(val-prev_val),xy=(idx,val),textcoords='data')
+                prev_val = val
+                
         return ax 
 
     def _plot_rolling_sharpe(self, stats, ax=None, **kwargs):
@@ -288,6 +293,31 @@ class TearsheetStatistics(AbstractStatistics):
         plt.setp(ax.get_xticklabels(), visible=True, rotation=0, ha='center')
         ax.set_title('Drawdown (%)', fontweight='bold')
         return ax
+
+    def _plot_num_trades_byYear(self, stats, ax=None, **kwargs):
+        """
+        Plot number of trades in each year
+        """
+        pos = stats["positions"]
+        pos_byYear = pos.groupby(pd.Grouper(key="open_timestamp", freq="A"))
+        num_groups = len(pos_byYear.groups.keys())
+
+        n = [y.shape[0] for idx,y in pos_byYear]
+        idx = [index.year for index,y in pos_byYear]
+
+        num_trades_byYear = pd.DataFrame(np.array(n).reshape(1,num_groups))
+        num_trades_byYear.columns = idx
+
+        sns.heatmap(
+                num_trades_byYear,
+                annot=True,
+                fmt="d",
+                cbar=False,
+                ax=ax,
+                **kwargs)
+        ax.set_title('Number of trades by year')
+        ax.set_ylabel("")
+
 
     def _plot_monthly_returns(self, stats, ax=None, **kwargs):
         """
@@ -631,7 +661,7 @@ class TearsheetStatistics(AbstractStatistics):
             offset_index = 1
         else:
             offset_index = 0
-        vertical_sections = 7 + offset_index
+        vertical_sections = 8 + offset_index
         fig = plt.figure(figsize=(10, vertical_sections * 3.5))
         fig.suptitle(self.title, y=0.94, weight='bold')
         gs = gridspec.GridSpec(vertical_sections, 3, wspace=0.25, hspace=0.5)
@@ -647,6 +677,7 @@ class TearsheetStatistics(AbstractStatistics):
         ax_txt_curve = plt.subplot(gs[6 + offset_index, 0])
         ax_txt_trade = plt.subplot(gs[6 + offset_index, 1])
         ax_txt_time = plt.subplot(gs[6 + offset_index, 2])
+        ax_num_trades_byYear = plt.subplot(gs[7 + offset_index, :2])
 
         self._plot_equity(stats, ax=ax_equity)
         self._plot_equity_close(stats, ax_equity_close)
@@ -659,6 +690,7 @@ class TearsheetStatistics(AbstractStatistics):
         self._plot_txt_curve(stats, ax=ax_txt_curve)
         self._plot_txt_trade(stats, ax=ax_txt_trade)
         self._plot_txt_time(stats, ax=ax_txt_time)
+        self._plot_num_trades_byYear(stats, ax=ax_num_trades_byYear)
 
         # Plot the figure
         plt.show(block=True)

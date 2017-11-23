@@ -10,7 +10,7 @@ class MoreLossLessLots(AbstractPositionSizer):
     # determined by the strategy
     def __init__(self, initial_quantity=0):
         self.initial_quantity = initial_quantity
-        self.max_risk = 0.02
+        self.max_risk = 0.05
         self.decrease_factor = 3.0
         self.init_lot = 0.1
         
@@ -29,8 +29,9 @@ class MoreLossLessLots(AbstractPositionSizer):
             else:
                 initial_order.action = "BOT"
 
-            initial_order.quantity = portfolio.positions[ticker].quantity
+            initial_order.quantity = abs(portfolio.positions[ticker].quantity)
             return initial_order
+
 
         """
         lot = self.init_lot
@@ -54,4 +55,6 @@ class MoreLossLessLots(AbstractPositionSizer):
 
         initial_order.quantity = int(lot*self.base_quantity)
         """
+        if initial_order.quantity < 0:
+            from pudb import set_trace; set_trace()
         return initial_order

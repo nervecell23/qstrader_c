@@ -47,7 +47,8 @@ class PortfolioHandler(object):
         order = SuggestedOrder(
             signal_event.ticker,
             signal_event.action,
-            quantity=quantity
+            quantity=quantity,
+            isclose=signal_event.isclose
         )
         return order
 
@@ -96,10 +97,12 @@ class PortfolioHandler(object):
         """
         # Create the initial order list from a signal event
         initial_order = self._create_order_from_signal(signal_event)
+
         # Size the quantity of the initial order
         sized_order = self.position_sizer.size_order(
             self.portfolio, initial_order
         )
+
         # Refine or eliminate the order via the risk manager overlay
         order_events = self.risk_manager.refine_orders(
             self.portfolio, sized_order

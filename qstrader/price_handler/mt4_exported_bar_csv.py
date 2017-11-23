@@ -41,11 +41,11 @@ class Mt4CsvBarPriceHandler(AbstractBarPriceHandler):
 		self.tickers_data[ticker] = pd.read_csv(
 						ticker_path, 
 						header=None, 
-						parse_dates=True,
-						index_col=0, 
-						names=["Date","Time","Open","High","Low",
-							"Close","Vol"]
-						)
+						parse_dates=[[0,1]],
+						index_col=0)
+
+                self.tickers_data[ticker].columns = ["Open", "High", "Low", "Close", "Vol"]
+												
 		self.tickers_data[ticker]["Ticker"] = ticker 
 
 	def subscribe_ticker(self, ticker):
@@ -110,7 +110,7 @@ class Mt4CsvBarPriceHandler(AbstractBarPriceHandler):
 			cur_close = event.close_price / float(PriceParser.PRICE_MULTIPLIER)
 			self.tickers[ticker]["return"] = cur_close / prev_close - 1.0
 			self.calc_returns.append(self.tickers[ticker]["return"])
-			
+		self.tickers[ticker]["open"] = event.open_price	
 		self.tickers[ticker]["close"] = event.close_price
 		self.tickers[ticker]["timestamp"] = event.time
 
@@ -121,7 +121,7 @@ class Mt4CsvBarPriceHandler(AbstractBarPriceHandler):
 			self.continue_backtest = False
 			return
 		ticker = row["Ticker"]
-		period = 86400
+		period = 14400
 		bev = self._create_event(index, period, ticker, row)
 		self._store_event(bev)
 		self.events_queue.put(bev)	

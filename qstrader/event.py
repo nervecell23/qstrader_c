@@ -147,7 +147,7 @@ class SignalEvent(Event):
     Handles the event of sending a Signal from a Strategy object.
     This is received by a Portfolio object and acted upon.
     """
-    def __init__(self, ticker, action, suggested_quantity=None):
+    def __init__(self, ticker, action, suggested_quantity=None, isclose=False):
         """
         Initialises the SignalEvent.
 
@@ -163,6 +163,7 @@ class SignalEvent(Event):
         self.ticker = ticker
         self.action = action
         self.suggested_quantity = suggested_quantity
+        self.isclose = isclose
 
 
 class OrderEvent(Event):
@@ -171,7 +172,7 @@ class OrderEvent(Event):
     The order contains a ticker (e.g. GOOG), action (BOT or SLD)
     and quantity.
     """
-    def __init__(self, ticker, action, quantity):
+    def __init__(self, ticker, action, quantity, isclose):
         """
         Initialises the OrderEvent.
 
@@ -179,11 +180,13 @@ class OrderEvent(Event):
         ticker - The ticker symbol, e.g. 'GOOG'.
         action - 'BOT' (for long) or 'SLD' (for short).
         quantity - The quantity of shares to transact.
+        isclose - Whether the order closes a position or not
         """
         self.type = EventType.ORDER
         self.ticker = ticker
         self.action = action
         self.quantity = quantity
+        self.isclose = isclose
 
     def print_order(self):
         """
@@ -212,7 +215,7 @@ class FillEvent(Event):
         self, timestamp, ticker,
         action, quantity,
         exchange, price,
-        commission
+        commission, isclose=False
     ):
         """
         Initialises the FillEvent object.
@@ -233,6 +236,7 @@ class FillEvent(Event):
         self.exchange = exchange
         self.price = price
         self.commission = commission
+        self.isclose=isclose
 
 
 class SentimentEvent(Event):

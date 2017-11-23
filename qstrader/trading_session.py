@@ -119,7 +119,7 @@ class TradingSession(object):
         if self.statistics is None:
             self.statistics = TearsheetStatistics(
                 self.config, self.portfolio_handler,
-                self.title, self.benchmark
+                self.title, self.benchmark, periods=410
             )
 
     def _continue_loop_condition(self):
@@ -187,5 +187,6 @@ class TradingSession(object):
             )
         )
         if not testing:
-            self.statistics.plot_results()
+            filename = self.statistics.get_filename(filename="")
+            self.statistics.plot_results(filename=filename)
         return results

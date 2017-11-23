@@ -12,6 +12,7 @@ class ExampleRiskManager(AbstractRiskManager):
         order_event = OrderEvent(
             sized_order.ticker,
             sized_order.action,
-            sized_order.quantity
+            sized_order.quantity,
+            sized_order.isclose
         )
         return [order_event]

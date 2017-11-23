@@ -37,7 +37,7 @@ class ExampleCompliance(AbstractCompliance):
             "timestamp", "ticker",
             "action", "quantity",
             "exchange", "price",
-            "commission"
+            "commission", "isclose"
         ]
         fname = os.path.expanduser(os.path.join(self.config.OUTPUT_DIR, self.csv_filename))
         with open(fname, 'a') as csvfile:
@@ -55,5 +55,6 @@ class ExampleCompliance(AbstractCompliance):
                 fill.timestamp, fill.ticker,
                 fill.action, fill.quantity,
                 fill.exchange, PriceParser.display(fill.price, 4),
-                PriceParser.display(fill.commission, 4)
+                PriceParser.display(fill.commission, 4),
+                fill.isclose
             ])

@@ -87,10 +87,8 @@ class AbstractBarPriceHandler(AbstractPriceHandler):
         return True
 
     def _store_event(self, event):
-        """
-        Store price event for closing price and adjusted closing price
-        """
         ticker = event.ticker
+        self.tickers[ticker]["open"] = event.open_price
         self.tickers[ticker]["close"] = event.close_price
         self.tickers[ticker]["adj_close"] = event.adj_close_price
         self.tickers[ticker]["timestamp"] = event.time
@@ -105,6 +103,17 @@ class AbstractBarPriceHandler(AbstractPriceHandler):
         else:
             print(
                 "Close price for ticker %s is not "
-                "available from the YahooDailyBarPriceHandler."
+                "available from the PriceHandler."%ticker
             )
             return None
+
+    def get_last_open(self, ticker):
+        if ticker in self.tickers:
+            open_price = self.tickers[ticker]["open"]
+            return open_price
+        else:
+            print(
+                "Open price for ticker %s is not "
+                "available from the PriceHandler."%ticker)
+            return None
+        

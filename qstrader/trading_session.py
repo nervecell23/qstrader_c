@@ -21,7 +21,7 @@ class TradingSession(object):
     """
     def __init__(
         self, config, strategy, tickers,
-        equity, start_date, end_date, events_queue,
+        equity, start_date, end_date, events_queue, statistics_period,
         session_type="backtest", end_session_time=None,
         price_handler=None, portfolio_handler=None,
         compliance=None, position_sizer=None,
@@ -40,6 +40,7 @@ class TradingSession(object):
         self.start_date = start_date
         self.end_date = end_date
         self.events_queue = events_queue
+        self.statistics_period = statistics_period
         self.price_handler = price_handler
         self.portfolio_handler = portfolio_handler
         self.compliance = compliance
@@ -119,7 +120,7 @@ class TradingSession(object):
         if self.statistics is None:
             self.statistics = TearsheetStatistics(
                 self.config, self.portfolio_handler,
-                self.title, self.benchmark, periods=410
+                self.title, self.benchmark, periods=self.statistics_period
             )
 
     def _continue_loop_condition(self):

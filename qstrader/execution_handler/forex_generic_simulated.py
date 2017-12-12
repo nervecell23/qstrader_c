@@ -28,7 +28,7 @@ class ForexGenericSimulatedExecution(AbstractExecutionHandler):
             quantity = event.quantity
             timestamp = self.price_handler.get_last_timestamp(ticker)
             isclose = event.isclose
-            action_price = self.price_handler.get_last_open(ticker)
+            action_price = self.price_handler.get_last_close(ticker)
             fill_price = action_price
         # No exchange in FX trading
         exchange = "-"

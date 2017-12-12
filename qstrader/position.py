@@ -78,8 +78,8 @@ class Position(object):
         allows calculation of the unrealised and realised profit
         and loss of any transactions.
         """
-        midpoint = (bid + ask) // 2
-        self.market_value = self.quantity * midpoint * sign(self.net)
+        midpoint = (bid + ask) // 2 
+        self.market_value = abs(self.quantity) * midpoint * sign(self.net)
         self.unrealised_pnl = self.market_value - self.cost_basis
 
     def transact_shares(self, action, quantity, price, commission):

@@ -23,10 +23,15 @@ class FixedRisk(AbstractPositionSizer):
 
         else:
             cur_price = portfolio.price_handler.get_last_close(ticker)
+            '''
+            The reason for having 'min(size_1, size_2)' is that:
+            In the case that the cash available, after deducting 5% for volatility, is not 
+            enough for placing the order with 'size_1', we can then only place whatever
+            amount we can afford after spending all (95%) we have.
+            '''
             size_1 = int(portfolio.cur_cash * self.max_risk // PriceParser.parse(self.max_volatility))
             size_2 = int(portfolio.cur_cash * (1 - self.max_risk) // cur_price)
             initial_order.quantity = min(size_1, size_2)
-            initial_order.quantity = 100000
-
+            
         return initial_order
 

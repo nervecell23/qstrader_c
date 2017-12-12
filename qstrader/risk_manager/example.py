@@ -10,9 +10,9 @@ class ExampleRiskManager(AbstractRiskManager):
         OrderEvent object and adds it to a list.
         """
         order_event = OrderEvent(
-            sized_order.ticker,
-            sized_order.action,
-            sized_order.quantity,
-            sized_order.isclose
+            ticker=sized_order.ticker,
+            action=sized_order.action,
+            quantity=sized_order.quantity,
+            isclose=sized_order.isclose
         )
         return [order_event]

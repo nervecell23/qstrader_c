@@ -31,7 +31,8 @@ class PortfolioHandler(object):
         self.position_sizer = position_sizer
         self.risk_manager = risk_manager
         self.portfolio = Portfolio(price_handler, initial_cash)
-
+        self.signal_storage = {}
+        
     def _create_order_from_signal(self, signal_event):
         """
         Take a SignalEvent object and use it to form a
@@ -40,10 +41,15 @@ class PortfolioHandler(object):
         At this stage they are simply "suggestions" that the
         RiskManager will either verify, modify or eliminate.
         """
-        if signal_event.suggested_quantity is None:
-            quantity = 0
+        if signal_event.isclose is True:
+            quantity = self.signal_storage[signal_event.signal_id]
+            del self.signal_storage[signal_event.signal_id]
         else:
-            quantity = signal_event.suggested_quantity
+            if signal_event.suggested_quantity is None:
+                quantity = 0
+            else:
+                quantity = signal_event.suggested_quantity
+
         order = SuggestedOrder(
             signal_event.ticker,
             signal_event.action,
@@ -95,18 +101,31 @@ class PortfolioHandler(object):
         Once received from the RiskManager they are converted into
         full OrderEvent objects and sent back to the events queue.
         """
+        # If the signal is for closing an order
+        # Simply fetch the order quantity according to signal ID
+        # and proceed order directly without position sizing and 
+        # risk management
+
         # Create the initial order list from a signal event
         initial_order = self._create_order_from_signal(signal_event)
 
         # Size the quantity of the initial order
-        sized_order = self.position_sizer.size_order(
-            self.portfolio, initial_order
-        )
-
+        if signal_event.isclose is False:
+            sized_order = self.position_sizer.size_order(
+                self.portfolio, initial_order
+            )
+        else:
+            sized_order = initial_order
         # Refine or eliminate the order via the risk manager overlay
         order_events = self.risk_manager.refine_orders(
             self.portfolio, sized_order
         )
+
+        # Put open-trade signal in signal_storage
+        for order in order_events:
+            if order.isclose is False:
+                self.signal_storage[signal_event.signal_id] = order.quantity
+
         # Place orders onto events queue
         self._place_orders_onto_queue(order_events)
 

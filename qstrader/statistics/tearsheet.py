@@ -45,6 +45,7 @@ class TearsheetStatistics(AbstractStatistics):
         self.rolling_sharpe = rolling_sharpe
         self.equity = {}
         self.equity_post_close = {}
+        self.equity_order_close = {}
         self.equity_benchmark = {}
         self.log_scale = False
 
@@ -57,9 +58,15 @@ class TearsheetStatistics(AbstractStatistics):
             self.portfolio_handler.portfolio.equity
         )
         
+        # Sample the equity data when a position is closed
         if portfolio_handler.portfolio.new_pos_closed == True:
             self.equity_post_close[timestamp] = self.equity[timestamp]
             portfolio_handler.portfolio.new_pos_closed = False
+
+        # Sample the equity data when an order is closed
+        if portfolio_handler.portfolio.new_order_closed == True:
+            self.equity_order_close[timestamp] = self.equity[timestamp]
+            portfolio_handler.portfolio.new_order_closed = False
 
         if self.equity[timestamp] < 0:
             print("ACCOUNT BUSTED! : %s" %timestamp)
@@ -298,6 +305,7 @@ class TearsheetStatistics(AbstractStatistics):
         """
         Plot number of trades in each year
         """
+        #from pudb import set_trace; set_trace()
         pos = stats["positions"]
         pos_byYear = pos.groupby(pd.Grouper(key="open_timestamp", freq="A"))
         num_groups = len(pos_byYear.groups.keys())

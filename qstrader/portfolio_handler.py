@@ -79,15 +79,18 @@ class PortfolioHandler(object):
         modifying how the ExecutionHandler object handles slippage,
         transaction costs, liquidity and market impact.
         """
+        
         action = fill_event.action
         ticker = fill_event.ticker
         quantity = fill_event.quantity
         price = fill_event.price
         commission = fill_event.commission
+        isclose = fill_event.isclose
+
         # Create or modify the position from the fill info
         self.portfolio.transact_position(
             action, ticker, quantity,
-            price, commission
+            price, commission, isclose
         )
 
     def on_signal(self, signal_event):
@@ -116,7 +119,10 @@ class PortfolioHandler(object):
             )
         else:
             sized_order = initial_order
+
         # Refine or eliminate the order via the risk manager overlay
+        # Currently risk manager module does not do anything, therefore
+        # it is ok to put 'closing order' signal through it
         order_events = self.risk_manager.refine_orders(
             self.portfolio, sized_order
         )

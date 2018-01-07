@@ -22,7 +22,15 @@ class Portfolio(object):
         self.realised_pnl = 0
         self.margin =0
         self.free_margin = 0
+
+        # Equity data is updated everytime when new price bar
+        # arrives. Flag 'new_pos_closed' is raised when a 
+        # position is closed; flag 'new_order_closed' is raised
+        # whenever an order is closed. The equity chart will
+        # look different when use different flag to sample the
+        # equity data.
         self.new_pos_closed = True
+        self.new_order_closed = True
 
     def _update_portfolio(self):
         """
@@ -125,7 +133,7 @@ class Portfolio(object):
 
     def transact_position(
         self, action, ticker,
-        quantity, price, commission
+        quantity, price, commission, isclose
     ):
         """
         Handles any new position or modification to
@@ -150,3 +158,6 @@ class Portfolio(object):
                 action, ticker, quantity,
                 price, commission
             )
+
+        if isclose == True:
+            self.new_order_closed = True;

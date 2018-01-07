@@ -2,7 +2,7 @@ from .base import AbstractPositionSizer
 from qstrader.price_parser import PriceParser
 
 class FixedRisk(AbstractPositionSizer):
-    def __init__(self, initial_quantity=0, max_risk=0.05, max_volatility=0.015):
+    def __init__(self, initial_quantity=100000, max_risk=0.05, max_volatility=0.015):
         self.initial_quantity = initial_quantity
         self.max_risk = max_risk
         self.base_quantity = 100000
@@ -32,6 +32,7 @@ class FixedRisk(AbstractPositionSizer):
             size_1 = int(portfolio.cur_cash * self.max_risk // PriceParser.parse(self.max_volatility))
             size_2 = int(portfolio.cur_cash * (1 - self.max_risk) // cur_price)
             initial_order.quantity = min(size_1, size_2)
-            
+            initial_order.quantity = self.initial_quantity
+             
         return initial_order
 

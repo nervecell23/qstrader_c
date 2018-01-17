@@ -7,7 +7,7 @@ class SuggestedOrder(object):
     that a suggested order is never transacted unless it has been
     scrutinised by the position sizing and risk management layers.
     """
-    def __init__(self, ticker, action, quantity=0, isclose=False):
+    def __init__(self, ticker, action, quantity=0, isclose=False, signal_id=None):
         """
         Initialises the SuggestedOrder. The quantity defaults
         to zero as the PortfolioHandler creates these objects
@@ -27,3 +27,4 @@ class SuggestedOrder(object):
         self.action = action
         self.quantity = quantity
         self.isclose = isclose
+        self.signal_id = signal_id

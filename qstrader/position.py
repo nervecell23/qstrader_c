@@ -3,7 +3,7 @@ from numpy import sign
 
 class Position(object):
     def __init__(
-        self, action, ticker, init_quantity,
+        self, action, ticker, signal_id, init_quantity,
         init_price, init_commission,
         bid, ask, open_timestamp, close_timestamp=None
     ):
@@ -39,6 +39,7 @@ class Position(object):
        
         self._calculate_initial_value()
         self.update_market_value(bid, ask)
+        self.signal_id = signal_id
 
     def _calculate_initial_value(self):
         """
@@ -79,7 +80,7 @@ class Position(object):
         and loss of any transactions.
         """
         midpoint = (bid + ask) // 2 
-        self.market_value = abs(self.quantity) * midpoint * sign(self.net)
+        self.market_value = self.quantity * midpoint * sign(self.net)
         self.unrealised_pnl = self.market_value - self.cost_basis
 
     def transact_shares(self, action, quantity, price, commission):

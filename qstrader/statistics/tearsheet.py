@@ -30,7 +30,7 @@ class TearsheetStatistics(AbstractStatistics):
     """
     def __init__(
         self, config, portfolio_handler,
-        title=None, benchmark=None, periods=252,
+        title=None, benchmark=None, periods=410,
         rolling_sharpe=False
     ):
         """
@@ -48,6 +48,7 @@ class TearsheetStatistics(AbstractStatistics):
         self.equity_order_close = {}
         self.equity_benchmark = {}
         self.log_scale = False
+        self.prev_equity = None
 
     def update(self, timestamp, portfolio_handler):
         """
@@ -57,6 +58,8 @@ class TearsheetStatistics(AbstractStatistics):
         self.equity[timestamp] = PriceParser.display(
             self.portfolio_handler.portfolio.equity
         )
+
+        self.prev_equity = self.equity[timestamp]
         
         # Sample the equity data when a position is closed
         if portfolio_handler.portfolio.new_pos_closed == True:

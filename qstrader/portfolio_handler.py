@@ -5,7 +5,7 @@ from .portfolio import Portfolio
 class PortfolioHandler(object):
     def __init__(
         self, initial_cash, events_queue,
-        price_handler, position_sizer, risk_manager
+        price_handler, position_sizer, risk_manager, ticker
     ):
         """
         The PortfolioHandler is designed to interact with the
@@ -32,6 +32,7 @@ class PortfolioHandler(object):
         self.risk_manager = risk_manager
         self.portfolio = Portfolio(price_handler, initial_cash)
         self.signal_storage = {}
+        self.ticker = ticker[0]
         
     def _create_order_from_signal(self, signal_event):
         """
@@ -41,6 +42,7 @@ class PortfolioHandler(object):
         At this stage they are simply "suggestions" that the
         RiskManager will either verify, modify or eliminate.
         """
+
         if signal_event.isclose is True:
             quantity = self.signal_storage[signal_event.signal_id]
             del self.signal_storage[signal_event.signal_id]
@@ -54,7 +56,8 @@ class PortfolioHandler(object):
             signal_event.ticker,
             signal_event.action,
             quantity=quantity,
-            isclose=signal_event.isclose
+            isclose=signal_event.isclose,
+            signal_id=signal_event.signal_id
         )
         return order
 
@@ -86,11 +89,18 @@ class PortfolioHandler(object):
         price = fill_event.price
         commission = fill_event.commission
         isclose = fill_event.isclose
+        signal_id = fill_event.signal_id
+
 
         # Create or modify the position from the fill info
         self.portfolio.transact_position(
-            action, ticker, quantity,
-            price, commission, isclose
+            action=action,
+            ticker=ticker,
+            signal_id=signal_id,
+            quantity=quantity,
+            price=price,
+            commission=commission,
+            isclose=isclose
         )
 
     def on_signal(self, signal_event):
@@ -153,4 +163,4 @@ class PortfolioHandler(object):
         Update the portfolio to reflect current market value as
         based on last bid/ask of each ticker.
         """
-        self.portfolio._update_portfolio()
+        self.portfolio._update_portfolio(self.ticker)

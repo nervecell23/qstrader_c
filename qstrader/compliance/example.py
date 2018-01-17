@@ -34,10 +34,8 @@ class ExampleCompliance(AbstractCompliance):
 
         # Write new file header
         fieldnames = [
-            "timestamp", "ticker",
-            "action", "quantity",
-            "exchange", "price",
-            "commission", "isclose"
+            "timestamp", "ticker", "signal_id",
+            "action", "quantity", "price", "isclose"
         ]
         fname = os.path.expanduser(os.path.join(self.config.OUTPUT_DIR, self.csv_filename))
         with open(fname, 'a') as csvfile:
@@ -52,9 +50,11 @@ class ExampleCompliance(AbstractCompliance):
         with open(fname, 'a') as csvfile:
             writer = csv.writer(csvfile)
             writer.writerow([
-                fill.timestamp, fill.ticker,
-                fill.action, fill.quantity,
-                fill.exchange, PriceParser.display(fill.price, 4),
-                PriceParser.display(fill.commission, 4),
+                fill.timestamp, 
+                fill.ticker,
+                fill.signal_id,
+                fill.action,
+                fill.quantity,
+                PriceParser.display(fill.price, 4),
                 fill.isclose
             ])

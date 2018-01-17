@@ -95,7 +95,8 @@ class TradingSession(object):
                 self.events_queue,
                 self.price_handler,
                 self.position_sizer,
-                self.risk_manager
+                self.risk_manager,
+                self.tickers
             )
 
         if self.compliance is None:
@@ -173,7 +174,7 @@ class TradingSession(object):
                     else:
                         raise NotImplemented("Unsupported event.type '%s'" % event.type)
 
-    def start_trading(self, testing=False):
+    def start_trading(self, single_run=False, testing=False):
         """
         Runs either a backtest or live session, and outputs performance when complete.
         """

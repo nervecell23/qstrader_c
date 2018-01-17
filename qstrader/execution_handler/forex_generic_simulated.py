@@ -30,13 +30,23 @@ class ForexGenericSimulatedExecution(AbstractExecutionHandler):
             isclose = event.isclose
             action_price = self.price_handler.get_last_close(ticker)
             fill_price = action_price
+            signal_id = event.signal_id
         # No exchange in FX trading
         exchange = "-"
         # No commission in FX trading
         commission = 0
 
-        fill_event = FillEvent(timestamp, ticker, action, quantity,
-                               exchange, fill_price, commission, isclose)
+        fill_event = FillEvent(
+                timestamp=timestamp,
+                ticker=ticker,
+                action=action,
+                quantity=quantity,
+                exchange=exchange,
+                price=fill_price,
+                commission=commission,
+                isclose=isclose,
+                signal_id=signal_id)
+
         self.events_queue.put(fill_event)
 
         if self.compliance is not None:

@@ -175,7 +175,7 @@ class OrderEvent(Event):
     The order contains a ticker (e.g. GOOG), action (BOT or SLD)
     and quantity.
     """
-    def __init__(self, ticker, action, quantity, isclose):
+    def __init__(self, ticker, action, quantity, isclose, signal_id):
         """
         Initialises the OrderEvent.
 
@@ -190,6 +190,7 @@ class OrderEvent(Event):
         self.action = action
         self.quantity = quantity
         self.isclose = isclose
+        self.signal_id = signal_id
 
     def print_order(self):
         """
@@ -218,7 +219,7 @@ class FillEvent(Event):
         self, timestamp, ticker,
         action, quantity,
         exchange, price,
-        commission, isclose=False
+        commission, signal_id, isclose=False
     ):
         """
         Initialises the FillEvent object.
@@ -240,6 +241,7 @@ class FillEvent(Event):
         self.price = price
         self.commission = commission
         self.isclose=isclose
+        self.signal_id = signal_id
 
 
 class SentimentEvent(Event):

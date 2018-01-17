@@ -32,7 +32,7 @@ class Portfolio(object):
         self.new_pos_closed = True
         self.new_order_closed = True
 
-    def _update_portfolio(self):
+    def _update_portfolio(self, ticker):
         """
         Updates the value of all positions that are currently open.
         Value of closed positions is tallied as self.realised_pnl.
@@ -41,8 +41,8 @@ class Portfolio(object):
         self.equity = self.realised_pnl
         self.equity += self.init_cash
 
-        for ticker in self.positions:
-            pt = self.positions[ticker]
+        for signal_id in self.positions:
+            pt = self.positions[signal_id]
             if self.price_handler.istick():
                 bid, ask = self.price_handler.get_best_bid_ask(ticker)
             else:
@@ -51,6 +51,14 @@ class Portfolio(object):
                 ask = close_price
             pt.update_market_value(bid, ask)
             self.unrealised_pnl += pt.unrealised_pnl
+
+            #======DEBUG
+            """
+            t = self.price_handler.get_last_timestamp('EURUSD')
+            if t.month == 1:
+                from pudb import set_trace; set_trace()
+            """
+
             self.equity += (
                 pt.market_value - pt.cost_basis + pt.realised_pnl
             )
@@ -58,7 +66,7 @@ class Portfolio(object):
             self.free_margin = self.equity - self.margin
         
     def _add_position(
-        self, action, ticker,
+        self, action, ticker, signal_id,
         quantity, price, commission
     ):
         """
@@ -70,7 +78,7 @@ class Portfolio(object):
         Once the Position is added, the Portfolio values
         are updated.
         """
-        if ticker not in self.positions:
+        if signal_id not in self.positions:
             open_timestamp = self.price_handler.get_last_timestamp(ticker)           
 
             if self.price_handler.istick():
@@ -80,20 +88,20 @@ class Portfolio(object):
                 bid = close_price
                 ask = close_price
             position = Position(
-                action, ticker, quantity,
+                action, ticker, signal_id, quantity,
                 price, commission, bid, ask,
                 open_timestamp
             )
-            self.positions[ticker] = position
-            self._update_portfolio()
+            self.positions[signal_id] = position
+            self._update_portfolio(ticker)
         else:
             print(
-                "Ticker %s is already in the positions list. "
-                "Could not add a new position." % ticker
+                "Order %s is already in the positions list. "
+                "Could not add a new position." % signal_id
             )
 
     def _modify_position(
-        self, action, ticker,
+        self, action, ticker, signal_id,
         quantity, price, commission
     ):
         """
@@ -105,8 +113,8 @@ class Portfolio(object):
         Once the Position is modified, the Portfolio values
         are updated.
         """
-        if ticker in self.positions:
-            self.positions[ticker].transact_shares(
+        if signal_id in self.positions:
+            self.positions[signal_id].transact_shares(
                 action, quantity, price, commission
             )
             if self.price_handler.istick():
@@ -115,24 +123,24 @@ class Portfolio(object):
                 close_price = self.price_handler.get_last_close(ticker)
                 bid = close_price
                 ask = close_price
-            self.positions[ticker].update_market_value(bid, ask)
+            self.positions[signal_id].update_market_value(bid, ask)
 
-            if self.positions[ticker].quantity == 0:
-                closed= self.positions.pop(ticker)
+            if self.positions[signal_id].quantity == 0:
+                closed= self.positions.pop(signal_id)
                 closed.close_timestamp = self.price_handler.get_last_timestamp(ticker)
                 self.realised_pnl += closed.realised_pnl
                 self.closed_positions.append(closed)
                 self.new_pos_closed = True
 
-            self._update_portfolio()
+            self._update_portfolio(ticker)
         else:
             print(
-                "Ticker %s not in the current position list. "
-                "Could not modify a current position." % ticker
+                "Order %s not in the current position list. "
+                "Could not modify a current position." % signal_id
             )
 
     def transact_position(
-        self, action, ticker,
+        self, action, ticker, signal_id,
         quantity, price, commission, isclose
     ):
         """
@@ -148,14 +156,14 @@ class Portfolio(object):
         elif action == "SLD":
             self.cur_cash += ((quantity * price) - commission)
 
-        if ticker not in self.positions:
+        if signal_id not in self.positions:
             self._add_position(
-                action, ticker, quantity,
+                action, ticker, signal_id, quantity,
                 price, commission
             )
         else:
             self._modify_position(
-                action, ticker, quantity,
+                action, ticker, signal_id, quantity,
                 price, commission
             )
 

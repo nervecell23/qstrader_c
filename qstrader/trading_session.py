@@ -190,5 +190,6 @@ class TradingSession(object):
         )
         if not testing:
             filename = self.statistics.get_filename(filename="")
+            self.strategy.macd_dd.plot()
             self.statistics.plot_results(filename=filename)
         return results

@@ -41,7 +41,7 @@ class Mt4CsvBarPriceHandler(AbstractBarPriceHandler):
 		self.tickers_data[ticker] = pd.read_csv(
 						ticker_path, 
 						header=None, 
-						parse_dates=[[0,1]],
+						parse_dates=True,
 						index_col=0)
 
                 self.tickers_data[ticker].columns = ["Open", "High", "Low", "Close", "Vol"]

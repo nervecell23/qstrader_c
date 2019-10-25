@@ -39,6 +39,8 @@ class TearsheetStatistics(AbstractStatistics):
         self.config = config
         self.portfolio_handler = portfolio_handler
         self.price_handler = portfolio_handler.price_handler
+
+
         self.title = '\n'.join(title)
         self.benchmark = benchmark
         self.periods = periods
